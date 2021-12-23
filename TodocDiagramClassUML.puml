@@ -1,0 +1,148 @@
+@startuml
+title Diagramme de classes
+
+
+
+package model {
+
+entity Task {
+-id : long <PrimaryKey>
+-projectId : long <ForeignKey>
+-name : String
+-localDateTime : LocalDateTime
+-projectName : String
+-projectColor : int
++getId() : long
++getProjectId() : long
++getName() : String
++getLocalDateTime() : LocalDateTime
++getProject() : Project
++getProjectName : String
++getProjectColor : int
+}
+entity Project {
+-id : long <PrimaryKey>
+-name : String
+-color : int
++getAllProject() : Project
++getProjectById(id : long) : Project
++getId() : long
++getName() : String
++getColor() : int
++toString() : String
+}
+
+Project "1" o- "*" Task
+}
+
+
+
+package database <<Database>>{
+
+
+package Dao {
+
+interface ProjectDao {
+getProject() : LiveData<List<Project>>
+}
+interface TaskDao {
+
+insert(Task task)
+delete(Task task)
+getTasks() : LiveData<List<Project>>
+}
+}
+
+package repository {
+
+class TaskRepository {
+-taskDao : TaskDao
+-allTasks : LiveData<List<Task>>
+-projectDao : ProjectDao
+-allProject : LiveData<List<Project>>
++getAllTasks() : LiveData<List<Task>>
++getAllProject() : LiveData<List<Project>>
++insert(Task task)
++delete(Task task)
+}
+}
+
+package room {
+
+abstract class RoomDatabase {
++{abstract} taskDao() : TaskDao
++{abstract} projectDao() : ProjectDao
+-{static} INSTANCE : MyRoomDatabase
+-{static} NUMBER_OF_THREADS : int=4
++{static}databaseWriteExecutor : ExecutorService
+-{static}roomDatabaseCallback : RoomDatabase.Callback
+{static}+getDatabase(Context context) : RoomDatabase <synchronized>
+}
+}
+
+TaskRepository -- RoomDatabase
+RoomDatabase -- TaskDao
+RoomDatabase -- ProjectDao
+RoomDatabase "1" o- "*" Task
+}
+
+
+
+package view_model {
+
+class TaskViewModel {
+-repository : TaskRepository
+-allTasks : LiveData<List<Task>>
+-allProject : LiveData<List<Project>>
++getAllTasks() : LiveData<List<Task>>
++getAllProject() : LiveData<List<Project>>
++insert(Task task)
++delete(Task task)
+}
+
+TaskViewModel -- TaskRepository
+}
+
+
+package ui {
+
++class MainActivity {
+-taskViewModel : TaskViewModel
+-tasks : ArrayList<>
+-adapter : TaskAdapter
+-sortMethod : SortMethod
+-dialog : AlertDialog
+-dialogEditText : EditText
+-dialogSpinner : Spinner
+-listTasks : RecyclerView
+-lblNoTasks : TextView
++onCreate(@Nullable Bundle savedInstanceState)
++boolean onCreateOptionsMenu(Menu menu)
++boolean onOptionsItemSelected(MenuItem item)
++onDeleteTask(Task task)
+-onPositiveButtonClick(DialogInterface dialogInterface)
+-showAddTaskDialog()
+-addTask(@NonNull Task task)
+-updateTasks()
+-AlertDialog getAddTaskDialog()
+-populateDialogSpinner()
+}
+
+-enum SortMethod {
+ALPHABETICAL
+ALPHABETICAL_INVERTED
+RECENT_FIRST
+OLD_FIRST
+}
+
++class TaskAdapter {
+-tasks : List<Task>
+-deleteTaskListener : DeleteTaskListener
+}
+
+SortMethod -- MainActivity
+TaskAdapter -- MainActivity
+MainActivity -- TaskViewModel
+}
+
+@enduml
